@@ -6,7 +6,7 @@ from rich.prompt import Prompt
 
 from how import __version__
 from how.core.config import Config
-from how.formatting import display_result
+from how.formatting import display_result, interactive_action_menu
 
 app = typer.Typer(
     name="how",
@@ -72,6 +72,12 @@ def to(
         raise typer.Abort()
 
     display_result(task, result)
+
+    if result.get("status") == "success" and result.get("commands"):
+        raw_cmds = result["commands"]
+        if isinstance(raw_cmds, list):
+            cmds = [str(c) for c in raw_cmds]
+            interactive_action_menu(cmds)
 
 
 @app.command()
