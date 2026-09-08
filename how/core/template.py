@@ -13,8 +13,11 @@ few_shot_examples_template = FewShotChatMessagePromptTemplate(
 
 PROMPT_TEMPLATE = ChatPromptTemplate.from_messages(
     [
-        ("system", SYSTEM_PROMPT + "\n{format_instructions}"),
+        ("system", SYSTEM_PROMPT + "\n{context}\n{format_instructions}"),
         few_shot_examples_template,
         ("human", "How to {task}?"),
     ]
-).partial(format_instructions=PARSER.get_format_instructions())
+).partial(
+    format_instructions=PARSER.get_format_instructions(),
+    context="",
+)

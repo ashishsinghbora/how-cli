@@ -3,6 +3,7 @@ import warnings
 from typing import Any
 
 from how.core.chains import get_chain
+from how.core.context import get_environment_context
 from how.core.parser import PARSER
 
 
@@ -30,9 +31,13 @@ def get_result(
 
     chain = get_chain(llm=llm)
 
-    payload: dict[str, Any] = {"task": task}
-    if context:
-        payload["context"] = context
+    if context is None:
+        context = get_environment_context()
+
+    payload: dict[str, Any] = {
+        "task": task,
+        "context": f"Environment Context:\n{context}\n",
+    }
 
     while tries > 0:
         with warnings.catch_warnings():

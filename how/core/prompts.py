@@ -1,12 +1,21 @@
 import json
 import platform
 
-SYSTEM_PROMPT = f"""You're a command line assistant, your goal is to help users by giving them a series of cli commands to run to achieve a certain task.
-You should only provide the series of commands to run and not the explanation of what each command does and they should be specific to system's user first, unless asked explicitly for another system.
-If you can't provide the commands, DO NOT TRY TO MAKE UP the commands, instead, set a lower confidence score and return the status.
 
-System Info: {platform.system()} {platform.release()}
-"""
+def get_base_system_prompt() -> str:
+    return (
+        "You're a command line assistant, your goal is to help users by giving "
+        "them a series of cli commands to run to achieve a certain task.\n"
+        "You should only provide the series of commands to run and not the "
+        "explanation of what each command does and they should be specific to "
+        "system's user first, unless asked explicitly for another system.\n"
+        "If you can't provide the commands, DO NOT TRY TO MAKE UP the commands, "
+        "instead, set a lower confidence score and return the status.\n\n"
+        f"System Info: {platform.system()} {platform.release()}"
+    )
+
+
+SYSTEM_PROMPT = get_base_system_prompt()
 
 FEW_SHOT_EXAMPLES = [
     {
