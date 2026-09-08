@@ -48,14 +48,14 @@ class _ProviderEntry(dict):
         self._key = key
 
     def __getitem__(self, item: str) -> Any:
-        if item == "provider" and "provider" not in self:
-            self["provider"] = get_provider_class(self._key)
+        if item == "provider":
+            return get_provider_class(self._key)
         return super().__getitem__(item)
 
     def get(self, item: str, default: Any = None) -> Any:
-        if item == "provider" and "provider" not in self:
+        if item == "provider":
             try:
-                self["provider"] = get_provider_class(self._key)
+                return get_provider_class(self._key)
             except (ImportError, AttributeError, ValueError):
                 return default
         return super().get(item, default)
