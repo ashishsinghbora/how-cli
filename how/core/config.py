@@ -1,50 +1,86 @@
 import json
 from pathlib import Path
+from typing import Any
+
 
 class Config:
     """
     Manages the configuration of the application.
-    Config file is stored in the user's home directory.
+    Config file is stored in ~/.how/config.json by default.
     """
-    def __init__(self):
-        self.config_dir = Path.home() / ".how"
+
+    def __init__(self, config_dir: Path | None = None) -> None:
+        self.config_dir = config_dir or (Path.home() / ".how")
         self.config_file = self.config_dir / "config.json"
         self.__init_config()
 
-    def __init_config(self):
+    def __init_config(self) -> None:
         """
         Initialize the configuration directory & file if they don't exist.
         """
         if not self.config_dir.exists():
-            self.config_dir.mkdir()
-        
-        if not self.config_file.exists():
-            with open(self.config_file, "w") as f:
-                json.dump({"provider": "", "api_key": ""}, f, indent=4)
+            self.config_dir.mkdir(parents=True, exist_ok=True)
 
-    def setup(self, provider: str, api_key: str):
+        if not self.config_file.exists():
+            with open(self.config_file, "w", encoding="utf-8") as f:
+                json.dump(
+                    {
+                        "provider": "",
+                        "api_key": "",
+                        "model": "",
+                        "endpoint": "",
+                    },
+                    f,
+                    indent=4,
+                )
+
+    def setup(
+        self,
+        provider: str,
+        api_key: str = "",
+        model: str | None = None,
+        endpoint: str | None = None,
+    ) -> None:
         """
-        Set the LLM Provider & the corresponding API Key.
+        Save the LLM Provider, API Key, and optional custom model/endpoint.
         """
-        with open(self.config_file, "w") as f:
-            json.dump({"provider": provider, "api_key": api_key}, f, indent=4)
+        data: dict[str, Any] = {
+            "provider": provider,
+            "api_key": api_key,
+            "model": model or "",
+            "endpoint": endpoint or "",
+        }
+        with open(self.config_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4)
 
     @property
-    def values(self):
+    def values(self) -> dict[str, Any]:
         """
         Get the configuration values.
         """
-        with open(self.config_file) as f:
-            return json.load(f)
-        
-    def is_ready(self):
+        try:
+            with open(self.config_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except (OSError, json.JSONDecodeError):
+            return {}
+
+    def is_ready(self) -> bool:
         """
         Check if the configuration file is ready to use.
         """
         try:
-            assert self.values.get("provider")
-            assert self.values.get("api_key")
-        except:
-            return False
+            vals = self.values
+            provider = vals.get("provider")
+            if not provider:
+                return False
 
-        return True
+            from how.core.providers import LLM_PROVIDERS
+
+            provider_info = LLM_PROVIDERS.get(provider)
+            if not provider_info:
+                return False
+
+            requires_key = provider_info.get("requires_key", True)
+            return not (requires_key and not vals.get("api_key"))
+        except (KeyError, TypeError, ValueError, ImportError):
+            return False

@@ -5,3 +5,5 @@ langchain-google-vertexai
 langchain-groq
 langchain-openai
 langchain-anthropic
+langchain-ollama
+pyperclip

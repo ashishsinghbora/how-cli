@@ -1,5 +1,6 @@
-from how import __version__, __author__
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
+
+from how import __author__, __version__
 
 with open("README.md", "r", encoding="utf-8") as f:
     readme = f.read()
@@ -27,5 +28,5 @@ setup(
         "console_scripts": [
             "how=how.how:app",
         ]
-    }
+    },
 )

@@ -1,1 +1,3 @@
-from how.core import __version__, __author__
+from how.core import __author__, __version__
+
+__all__ = ["__author__", "__version__"]

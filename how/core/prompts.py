@@ -46,5 +46,5 @@ FEW_SHOT_EXAMPLES = [
                 "confidence": 0.87,
             }
         ),
-    }
+    },
 ]

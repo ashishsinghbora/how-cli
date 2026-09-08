@@ -1,8 +1,8 @@
+from rich import box
 from rich.console import Console
 from rich.panel import Panel
-from rich.text import Text
 from rich.table import Table
-from rich import box
+from rich.text import Text
 
 
 def display_result(task: str, result: dict):
