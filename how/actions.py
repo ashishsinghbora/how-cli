@@ -3,9 +3,55 @@ import subprocess
 
 import typer
 from rich.console import Console
+from rich.panel import Panel
 from rich.prompt import Prompt
 
+from how.core.safety import assess_risk
+
 console = Console()
+
+CONFIRMATION_PHRASE = "I UNDERSTAND THE RISKS"
+
+
+def check_safety_gate(commands: list[str]) -> bool:
+    """
+    Check if commands contain destructive patterns. If so, display a bold
+    warning panel and require an exact confirmation phrase.
+    """
+    flags = assess_risk(commands)
+    if not flags:
+        return True
+
+    warning_text = "[bold red]WARNING: Destructive or High-Risk Command(s) Detected![/bold red]\n\n"
+    for flag in flags:
+        warning_text += (
+            f"• [bold yellow]{flag.rule_name}[/bold yellow]: [bold white]{flag.command}[/bold white]\n"
+            f"  {flag.description}\n"
+        )
+    warning_text += (
+        f"\nTo prevent accidental damage, type the exact confirmation phrase:\n"
+        f"[bold white]{CONFIRMATION_PHRASE}[/bold white]"
+    )
+
+    console.print(
+        Panel(
+            warning_text,
+            title="[bold red]SAFETY GUARDRAIL ALERT[/bold red]",
+            border_style="red",
+        )
+    )
+
+    try:
+        user_input = Prompt.ask("Confirmation phrase")
+        if user_input.strip() != CONFIRMATION_PHRASE:
+            console.print(
+                "[yellow]Confirmation phrase mismatch. Execution blocked.[/yellow]"
+            )
+            return False
+        return True
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Execution blocked.[/yellow]")
+        return False
 
 
 def copy_to_clipboard(commands: list[str]) -> bool:
@@ -28,11 +74,13 @@ def copy_to_clipboard(commands: list[str]) -> bool:
 def execute_commands(commands: list[str]) -> int:
     """
     Run commands sequentially via subprocess.run(cmd, shell=True)
-    after confirmation. Stop on first non-zero exit code and ask whether to continue.
-    Returns 0 on full success, or the last non-zero return code.
+    after confirmation and safety verification.
     """
     if not commands:
         return 0
+
+    if not check_safety_gate(commands):
+        return 1
 
     if not typer.confirm("Are you sure you want to execute these commands?"):
         console.print("[yellow]Execution cancelled.[/yellow]")
