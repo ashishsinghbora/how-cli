@@ -81,6 +81,104 @@ def to(
 
 
 @app.command()
+def fix(
+    command: Annotated[
+        str,
+        typer.Option(
+            "--command",
+            "-c",
+            help="The failed command to diagnose (reads from history if omitted).",
+        ),
+    ] = "",
+    stderr: Annotated[
+        str,
+        typer.Option(
+            "--stderr",
+            "-e",
+            help="Error output or stderr message from the failed command.",
+        ),
+    ] = "",
+    exit_code: Annotated[
+        int | None,
+        typer.Option(
+            "--exit-code",
+            "-x",
+            help="Exit code returned by the failed command.",
+        ),
+    ] = None,
+) -> None:
+    """
+    Diagnoses the last failed shell command or error and provides fix commands.
+    """
+    if not config.is_ready():
+        typer.secho(
+            "Please setup the configuration first using `how setup`",
+            fg="red",
+            bold=True,
+        )
+        raise typer.Abort()
+
+    from how.core.exceptions import ConfigError
+    from how.core.history import get_last_history_command
+    from how.infer import get_result
+
+    target_cmd = command.strip()
+    if not target_cmd:
+        history_cmd = get_last_history_command()
+        if history_cmd:
+            target_cmd = history_cmd
+        else:
+            typer.secho(
+                "Could not find a previous command in shell history. "
+                "Please specify the command using --command / -c.",
+                fg="yellow",
+                bold=True,
+            )
+            raise typer.Abort()
+
+    console.print(
+        f"[bold cyan]Diagnosing failed command:[/bold cyan] [bold white]{target_cmd}[/bold white]"
+    )
+    if exit_code is not None:
+        console.print(f"[yellow]Exit code:[/yellow] {exit_code}")
+    if stderr:
+        console.print(f"[yellow]Error message:[/yellow] {stderr.strip()}")
+
+    # Build targeted prompt
+    task_description = (
+        f"Fix and resolve the failure of the shell command: `{target_cmd}`."
+    )
+    details: list[str] = []
+    if exit_code is not None:
+        details.append(f"Exit code: {exit_code}")
+    if stderr:
+        details.append(f"Error output / stderr:\n{stderr.strip()}")
+    if details:
+        task_description += "\nFailure details:\n" + "\n".join(details)
+    task_description += "\nProvide the series of exact cli commands needed to fix the issue and succeed."
+
+    try:
+        with console.status(
+            "[bold green]Analyzing error and formulating fix...[/bold green]"
+        ):
+            result = get_result(task_description)
+    except ConfigError as e:
+        typer.secho(f"Configuration error: {e}", fg="red", bold=True)
+        raise typer.Abort()
+    except Exception as e:  # noqa: BLE001
+        typer.secho(f"Error communicating with LLM: {e}", fg="red", bold=True)
+        raise typer.Abort()
+
+    display_result(f"Fix failed command: {target_cmd}", result)
+
+    if result.get("status") == "success" and result.get("commands"):
+        raw_cmds = result["commands"]
+        if isinstance(raw_cmds, list):
+            cmds = [str(c) for c in raw_cmds]
+            interactive_action_menu(cmds)
+
+
+@app.command()
 def setup(
     interactive: Annotated[
         bool,
