@@ -33,7 +33,9 @@ def get_provider_class(provider: str) -> Callable[..., Any]:
 
             return ChatOllama
         except ImportError:
-            from langchain_community.chat_models import ChatOllama
+            from langchain_community.chat_models import (  # type: ignore[import-not-found,no-redef]
+                ChatOllama,
+            )
 
             return ChatOllama
     else:
