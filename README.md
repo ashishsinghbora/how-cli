@@ -30,7 +30,7 @@ pip install -U how-cli
 
 **2. Manual Installation**
 ```bash
-git clone https://github.com/ashishsinghbora/how-cli.git && cd how-cli
+git clone https://github.com/FireHead90544/how-cli.git && cd how-cli
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .
@@ -129,10 +129,10 @@ how fix -c "git push origin main" -e "error: failed to push some refs" -x 1
 | Provider | Default Model | Package | Requires Key | Tested |
 |:--------:|:-------------:|:-------:|:------------:|:------:|
 | **Ollama** (Local) | `qwen2.5-coder:latest` | `langchain-ollama` | ❌ No | ✅ |
-| GoogleGenAI | `gemini-1.5-flash` | `langchain-google-genai` | ✅ Yes | ✅ |
-| GoogleVertexAI | `gemini-1.5-flash` | `langchain-google-vertexai` | ✅ Yes | ❌ |
+| GoogleGenAI | `gemma-4-31b-it` | `langchain-google-genai` | ✅ Yes | ✅ |
+| GoogleVertexAI | `gemma-4-31b-it` | `langchain-google-vertexai` | ✅ Yes | ❌ |
 | GroqMistralAI | `mixtral-8x7b-32768` | `langchain-groq` | ✅ Yes | ✅ |
-| GroqLLaMa | `llama3-70b-8192` | `langchain-groq` | ✅ Yes | ✅ |
+| GroqLLaMa | `qwen/qwen3.8-27b` | `langchain-groq` | ✅ Yes | ✅ |
 | OpenAI | `gpt-4o` | `langchain-openai` | ✅ Yes | ✅ |
 | Anthropic | `claude-3-5-sonnet-20240620` | `langchain-anthropic` | ✅ Yes | ✅ |
 
@@ -169,3 +169,8 @@ bind -x '"\C-g": how-widget'
 
 ## Honourable Mentions
 This project is inspired by [kynnyhsap's](https://github.com/kynnyhsap) [how](https://github.com/kynnyhsap/how).
+
+## Maintainers
+
+- [@FireHead90544](https://github.com/FireHead90544) — Creator & Primary Maintainer
+- [@ashishsinghbora](https://github.com/ashishsinghbora) — Contributor

@@ -65,10 +65,10 @@ class _ProviderEntry(dict):
 
 # Documented fallback defaults per provider
 DEFAULT_MODELS: dict[str, str] = {
-    "GoogleGenAI": "gemini-1.5-flash",
-    "GoogleVertexAI": "gemini-1.5-flash",
+    "GoogleGenAI": "gemma-4-31b-it",
+    "GoogleVertexAI": "gemma-4-31b-it",
     "GroqMistralAI": "mixtral-8x7b-32768",
-    "GroqLLaMa": "llama3-70b-8192",
+    "GroqLLaMa": "qwen/qwen3.8-27b",
     "OpenAI": "gpt-4o",
     "Anthropic": "claude-3-5-sonnet-20240620",
     "Ollama": "qwen2.5-coder:latest",
